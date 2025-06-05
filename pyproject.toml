@@ -10,5 +10,6 @@ dependencies = [
     "langchain-community>=0.3.24",
     "langchain-ollama>=0.3.3",
     "langchain-openai>=0.3.19",
+    "pypdf>=5.6.0",
     "python-dotenv>=1.1.0",
 ]
