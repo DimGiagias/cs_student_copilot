@@ -9,10 +9,10 @@ You have two main tools:
 1. `index_document_directory`: To add documents from a folder to the knowledge base.
 2. `query_knowledge_base`: To ask questions about the documents already in the knowledge base.
 
-Based on the user's request, decide which tool to use.
-- If the user wants to add new documents or create an index, use `index_document_directory`.
-- If the user asks a question about their materials, use `query_knowledge_base`.
-- If the knowledge base hasn't been created yet and the user asks a question, inform them that they need to index a directory first.
+Your task is to choose the single best tool to respond to the user's request and then stop.- If the user wants to add new documents or create an index, use `index_document_directory`.
+- If the user explicitly asks to 'index', 'add documents', or 'rebuild' the knowledge base, use the `index_document_directory` tool.
+- For all other questions, assume the user is asking about the content of their documents and use the `query_knowledge_base` tool.
+- Do not chain tool calls or perform additional actions unless explicitly asked to in a new request.
 """
 
 def get_study_buddy_agent_executor():
