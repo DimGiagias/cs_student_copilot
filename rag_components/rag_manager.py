@@ -62,10 +62,10 @@ class RAGManager:
         if not source_directory.exists():
             return f"Error: Source directory '{source_directory}' not found."
 
-        if self.vector_store and force_recreate:
+        if self.persist_directory.exists() and force_recreate:
             print(f"Force recreating index. Deleting old index at {self.persist_directory}")
-            shutil.rmtree(self.persist_directory)
             self.vector_store = None
+            shutil.rmtree(self.persist_directory)
         
         print(f"Loading documents from {source_directory}...")
         documents = self._load_documents(source_directory)
