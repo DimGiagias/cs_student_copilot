@@ -1,6 +1,7 @@
 import argparse
 import os
 from agents.coordinator import route_query
+from dotenv import load_dotenv
 
 def main():
     parser = argparse.ArgumentParser(description="CS Student Copilot CLI")
@@ -16,6 +17,9 @@ def main():
     # studybuddy ask
     ask_parser = study_subparsers.add_parser("ask", help="Ask a question to your indexed knowledge base")
     ask_parser.add_argument("query", type=str, help="The question you want to ask")
+
+    code_parser = subparsers.add_parser("codehelper", help="Ask, programming questions, get code written or debbuged")
+    code_parser.add_argument("query", type=str, help="What you want CodeHelper to do (e.g. write code, debug, explain)")
 
     args = parser.parse_args()
 
@@ -33,6 +37,9 @@ def main():
             response = route_query(query=args.query, agent_name="studybuddy")
         else:
             response = "Unknown studybuddy command."
+    elif args.command_group == "codehelper":
+        print(f"Asking CodeHelper: {args.query}\n")
+        response = route_query(query=args.query, agent_name="codehelper")
     else:
         print(f"Unknown command group: {args.command_group}")
         parser.print_help()
@@ -46,6 +53,7 @@ def main():
 
 
 if __name__ == "__main__":
+    load_dotenv()
     if not os.getenv("OPENROUTER_API_KEY"):
         print("Error: OPENROUTER_API_KEY is not set in your environment or .env file.")
         print("Please set it up before running the CLI.")
