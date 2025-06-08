@@ -33,32 +33,23 @@ class RAGManager:
         self.llm = get_llm(model_name=RAG_LLM_MODEL if RAG_LLM_MODEL else DEFAULT_LLM_MODEL)
         self.vector_store: Optional[Chroma] = self._load_vector_store()
 
-    def _load_documents(self, data_path: Path) -> list:
-        if not data_path.is_dir():
-            return []
-        
-        # Document loaders.
-        txt_loader = DirectoryLoader(str(data_path), glob="**/*.txt", loader_cls=TextLoader, show_progress=True, use_multithreading=True)
-        pdf_loader = DirectoryLoader(str(data_path), glob="**/*.pdf", loader_cls=PyPDFLoader, show_progress=True, use_multithreading=True)
-        
-        return txt_loader.load() + pdf_loader.load()
+    def _load_documents(self, data_path: Path, file_type: str) -> list:
+        if not data_path.is_dir(): return []
+        loader_class = {'txt': TextLoader, 'pdf': PyPDFLoader}.get(file_type)
+        if not loader_class: return []
+        return DirectoryLoader(str(data_path), glob=f"**/*.{file_type}", loader_cls=loader_class, show_progress=False, use_multithreading=True).load()
 
     def _split_documents(self, documents: list) -> list:
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200) # Added back overlap
         return text_splitter.split_documents(documents)
 
     def _load_vector_store(self) -> Optional[Chroma]:
-        """Loads an existing Chroma vector store if it exists."""
         if self.persist_directory.exists():
             print(f"Loading existing vector store from: {self.persist_directory}")
-            return Chroma(
-                persist_directory=str(self.persist_directory),
-                embedding_function=self.embedding_function
-            )
+            return Chroma(persist_directory=str(self.persist_directory), embedding_function=self.embedding_function)
         return None
 
     def build_or_update_index(self, source_directory: Path, force_recreate: bool = False) -> str:
-        """Builds a new index or updates an existing one from a source directory."""
         if not source_directory.exists():
             return f"Error: Source directory '{source_directory}' not found."
 
@@ -67,44 +58,65 @@ class RAGManager:
             self.vector_store = None
             shutil.rmtree(self.persist_directory)
         
-        print(f"Loading documents from {source_directory}...")
-        documents = self._load_documents(source_directory)
-        if not documents:
-            return "No new documents found to index."
+        print("Loading documents...")
+        txt_docs = self._load_documents(source_directory, "txt")
+        pdf_docs = self._load_documents(source_directory, "pdf")
+        documents = txt_docs + pdf_docs
+
+        if not documents: 
+            return "No new documents (.txt or .pdf) found to index."
+        
+        feedback = f"Found {len(txt_docs)} .txt documents and {len(pdf_docs)} .pdf documents."
+        print(feedback)
         
         chunks = self._split_documents(documents)
         
         if self.vector_store is None:
             print("Creating new vector store.")
             self.vector_store = Chroma.from_documents(
-                documents=chunks,
-                embedding=self.embedding_function,
+                documents=chunks, 
+                embedding=self.embedding_function, 
                 persist_directory=str(self.persist_directory)
             )
-            return f"Successfully created new index with {len(chunks)} chunks from {len(documents)} documents."
+            return f"{feedback}\nSuccessfully created new index with {len(chunks)} chunks from {len(documents)} documents."
         else:
             print(f"Adding {len(chunks)} new chunks to existing vector store.")
             self.vector_store.add_documents(chunks)
-            return f"Successfully added {len(chunks)} new chunks from {len(documents)} documents to the index."
+            return f"{feedback}\nSuccessfully added {len(chunks)} new chunks from {len(documents)} documents to the index."
 
-    def get_qa_chain(self) -> Optional[RetrievalQA]:
-        """Builds and returns the RetrievalQA chain."""
-        if not self.vector_store:
-            print("Error: Vector store is not initialized. Please index documents first.")
+    def query(self, query_str: str) -> str:
+        if not self.vector_store: 
+            self.vector_store = self._load_vector_store()
+            
+        if not self.vector_store: 
+            return "Knowledge base not initialized. Please index a directory first."
+
+        qa_chain = self._get_qa_chain()
+        
+        if not qa_chain: 
+            return "Failed to create QA chain."
+
+        result = qa_chain.invoke({"query": query_str})
+        answer = result.get('result', 'Could not find an answer.')
+        sources = list(set([doc.metadata.get('source', 'N/A') for doc in result.get('source_documents', [])]))
+        if sources: answer += f"\n\nSources Used: {', '.join(sources)}"
+        return answer
+
+    def _get_qa_chain(self) -> Optional[RetrievalQA]:
+        if not self.vector_store: 
             return None
         
         retriever = self.vector_store.as_retriever(
-            search_type="mmr",
+            search_type="mmr", 
             search_kwargs={"k": 5, "fetch_k": 20}
         )
         
         prompt = PromptTemplate(template=QA_TEMPLATE_STR, input_variables=["context", "question"])
         
-        qa_chain = RetrievalQA.from_chain_type(
-            llm=self.llm,
-            chain_type="stuff",
-            retriever=retriever,
-            chain_type_kwargs={"prompt": prompt},
+        return RetrievalQA.from_chain_type(
+            llm=self.llm, 
+            chain_type="stuff", 
+            retriever=retriever, 
+            chain_type_kwargs={"prompt": prompt}, 
             return_source_documents=True
         )
-        return qa_chain
