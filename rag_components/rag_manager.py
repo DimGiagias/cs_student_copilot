@@ -3,13 +3,13 @@ from pathlib import Path
 from typing import Optional
 
 from langchain.chains import RetrievalQA
-from langchain_chroma import Chroma
-from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.prompts import PromptTemplate
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import DirectoryLoader, PyPDFLoader, TextLoader
+from langchain_chroma import Chroma
 
-from core.llm_service import get_llm, get_embedding_model
-from core.config import CHROMA_PERSIST_DIR, RAG_LLM_MODEL, DEFAULT_LLM_MODEL
+from core.config import CHROMA_PERSIST_DIR, DEFAULT_LLM_MODEL, RAG_LLM_MODEL
+from core.llm_service import get_embedding_model, get_llm
 
 QA_TEMPLATE_STR = """
 Use the following pieces of context to answer the question at the end.
