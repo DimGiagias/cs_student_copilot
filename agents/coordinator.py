@@ -6,5 +6,8 @@ def route_query(query: str, agent_name: str):
     elif agent_name == "codehelper":
         from .code_helper import run_code_helper
         return run_code_helper(query)
+    elif agent_name == "scholarscout":
+        from .scholar_scout import run_scholar_scout
+        return run_scholar_scout(query)
     else:
         return f"Error: Unknown agent '{agent_name}'. Cannot route query."
