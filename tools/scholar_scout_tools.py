@@ -1,5 +1,7 @@
-from langchain.tools import StructuredTool
 import requests
+import re
+
+from langchain.tools import StructuredTool
 from pydantic import BaseModel, Field
     
 class SemanticScholarInput(BaseModel):
@@ -48,4 +50,47 @@ semantic_scholar_tool = StructuredTool(
     func=search_semantic_scholar,
     description="Searches the Semantic Scholar academic paper database for a given query and returns a specified number of results.",
     args_schema=SemanticScholarInput
+)
+
+class PaperDetailsInput(BaseModel):
+    paper_id: str = Field(description="The Semantic Scholar Paper ID (e.g., '649def34f8be52c8b66281af98ae884c09a45b20').")
+
+def get_paper_details(paper_id: str) -> str:
+    """
+    Fetches detailed information for a single paper from Semantic Scholar using its ID.
+    """
+    base_url = f"https://api.semanticscholar.org/graph/v1/paper/{paper_id}"
+    params = {
+        "fields": "title,abstract,authors,url,year,tldr"
+    }
+    
+    print(f"Fetching details for paper: {paper_id}")
+    response = requests.get(base_url, params=params)
+
+    if not response.ok:
+        return f"API Error: Could not fetch details for paper ID {paper_id}. Status: {response.status_code}"
+
+    paper = response.json()
+    
+    title = paper.get("title", "N/A")
+    abstract = paper.get("abstract", "N/A")
+    authors = ", ".join(author.get("name", "N/A") for author in paper.get("authors", []))
+    url = paper.get("url", "N/A")
+    year = paper.get("year", "N/A")
+    tldr = paper.get("tldr", {}).get("text") if paper.get("tldr") else "No TLDR available."
+
+    return (
+        f"Title: {title}\n"
+        f"Authors: {authors}\n"
+        f"Year: {year}\n"
+        f"URL: {url}\n\n"
+        f"TLDR (Too Long; Didn't Read):\n{tldr}\n\n"
+        f"Abstract:\n{abstract}"
+    )
+
+get_paper_details_tool = StructuredTool(
+    name="get_paper_details_and_summary",
+    func=get_paper_details,
+    description="Fetches a detailed summary (including abstract and TLDR) of a single academic paper using its specific Semantic Scholar ID.",
+    args_schema=PaperDetailsInput
 )
