@@ -73,7 +73,7 @@ def get_final_answer_chain():
     prompt = ChatPromptTemplate.from_template(FINAL_ANSWER_PROMPT_TEMPLATE)
     return prompt | llm | StrOutputParser()
 
-def run_study_buddy_chain(query: str):
+def run_study_buddy(query: str):
     try:
         route_chain = get_route_chain()
         final_answer_chain = get_final_answer_chain()
