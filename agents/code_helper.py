@@ -24,6 +24,8 @@ IMPORTANT INSTRUCTIONS:
 - If you can answer the question without tools, do so directly without using any tools
 - Always provide a clear, complete response
 - When writing improved code, show the FULL improved version, not just snippets
+- If the user ask you to write code. FIRST write the code and THEN use the run_code_tool to test it.
+- Pieces of code must be returned like this: ```python\n{{code}}```
 
 Use your tools if needed, but respond clearly and precisely.
 '''
