@@ -21,6 +21,9 @@ def main():
     code_parser = subparsers.add_parser("codehelper", help="Ask, programming questions, get code written or debbuged")
     code_parser.add_argument("query", type=str, help="What you want CodeHelper to do (e.g. write code, debug, explain)")
 
+    scholar_parser = subparsers.add_parser("scholarscout", help="Request to find papers based on a subject")
+    scholar_parser.add_argument("query", type=str, help="Request to find papers based on a subject")
+
     args = parser.parse_args()
 
     response = None
@@ -40,6 +43,9 @@ def main():
     elif args.command_group == "codehelper":
         print(f"Asking CodeHelper: {args.query}\n")
         response = route_query(query=args.query, agent_name="codehelper")
+    elif args.command_group == "scholarscout":
+        print(f"Asking ScholarScout: {args.query}\n")
+        response = route_query(query=args.query, agent_name="scholarscout")
     else:
         print(f"Unknown command group: {args.command_group}")
         parser.print_help()

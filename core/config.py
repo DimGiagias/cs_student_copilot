@@ -17,5 +17,6 @@ RAG_LLM_MODEL = "meta-llama/llama-3.3-70b-instruct:free"
 EMBEDDING_MODEL = "mxbai-embed-large"
 
 CHROMA_PERSIST_DIR = Path("rag_db")
-
 DEFAULT_DOCS_DIR = Path("test_docs")
+
+DOWNLOADS_PATH = Path("downloads")

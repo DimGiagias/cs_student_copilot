@@ -413,6 +413,7 @@ dependencies = [
     { name = "langchain-openai" },
     { name = "pypdf" },
     { name = "python-dotenv" },
+    { name = "requests" },
 ]
 
 [package.metadata]
@@ -424,6 +425,7 @@ requires-dist = [
     { name = "langchain-openai", specifier = ">=0.3.19" },
     { name = "pypdf", specifier = ">=5.6.0" },
     { name = "python-dotenv", specifier = ">=1.1.0" },
+    { name = "requests", specifier = ">=2.32.3" },
 ]
 
 [[package]]
