@@ -28,7 +28,7 @@ def get_scholar_scout():
 
     agent = create_openai_tools_agent(llm, tools, prompt)
     
-    return AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True, max_iterations=3)
+    return AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True, max_iterations=6)
 
 def run_scholar_scout(query: str):
     try:
