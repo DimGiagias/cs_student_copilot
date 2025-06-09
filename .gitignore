@@ -13,3 +13,4 @@ wheels/
 
 # Project-generated files
 rag_db/
+fetched_materials/
