@@ -1,8 +1,11 @@
+from pathlib import Path
 import requests
 import re
 
 from langchain.tools import StructuredTool
 from pydantic import BaseModel, Field
+
+from core.config import DOWNLOADS_PATH
     
 class SemanticScholarInput(BaseModel):
     query: str = Field(description="The topic, keywords, or title to search for.")
@@ -93,4 +96,52 @@ get_paper_details_tool = StructuredTool(
     func=get_paper_details,
     description="Fetches a detailed summary (including abstract and TLDR) of a single academic paper using its specific Semantic Scholar ID.",
     args_schema=PaperDetailsInput
+)
+
+class DownloadPaperInput(BaseModel):
+    paper_id: str = Field(description="The Semantic Scholar Paper ID of the paper to download.")
+
+def download_paper_pdf(paper_id: str) -> str:
+    """
+    Attempts to find an open access PDF for a paper and download it.
+    """
+    details_url = f"https://api.semanticscholar.org/graph/v1/paper/{paper_id}"
+    params = {"fields": "title,isOpenAccess,openAccessPdf"}
+    response = requests.get(details_url, params=params)
+
+    if not response.ok:
+        return f"Error: Could not retrieve paper details to find download link. Status: {response.status_code}"
+
+    data = response.json()
+    if not data.get("isOpenAccess") or not data.get("openAccessPdf"):
+        return "Sorry, this paper is not available for free download (not Open Access)."
+    
+    pdf_url = data["openAccessPdf"]["url"]
+    title = data.get("title", f"Untitled_Paper_{paper_id}")
+    
+    # Sanitize the title to create a safe filename (remove illegal characters and trim length)
+    safe_filename = re.sub(r'[\\/*?:"<>|]', "", title)[:150].strip()
+    filename = f"{safe_filename}.pdf"
+    
+    try:
+        print(f"Downloading '{title}' as '{filename}' from: {pdf_url}")        
+        pdf_response = requests.get(pdf_url, stream=True, timeout=30)
+        pdf_response.raise_for_status()
+
+        DOWNLOADS_PATH.mkdir(exist_ok=True)
+        save_path = DOWNLOADS_PATH / filename
+
+        with open(save_path, 'wb') as f:
+            for chunk in pdf_response.iter_content(chunk_size=8192):
+                f.write(chunk)
+        
+        return f"Successfully downloaded '{filename}' to the '{DOWNLOADS_PATH}' directory."
+    except Exception as e:
+        return f"An error occurred during download: {e}"
+
+download_paper_tool = StructuredTool(
+    name="download_paper_pdf",
+    func=download_paper_pdf,
+    description="Downloads the PDF of an Open Access paper to a local directory using its Semantic Scholar ID.",
+    args_schema=DownloadPaperInput
 )

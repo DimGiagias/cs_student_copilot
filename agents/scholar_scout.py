@@ -2,7 +2,7 @@ from langchain.agents import AgentExecutor, create_openai_tools_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from core.llm_service import get_llm
-from tools.scholar_scout_tools import semantic_scholar_tool, get_paper_details_tool
+from tools.scholar_scout_tools import semantic_scholar_tool, get_paper_details_tool, download_paper_tool
 
 CODING_AGENT_SYSTEM_PROMPT = '''
 You are "ScholarScout", an expert assistant for searching academic papers.
@@ -21,7 +21,7 @@ if you are given a link of a paper like this 'https://www.semanticscholar.org/pa
 
 def get_scholar_scout():
     llm = get_llm()
-    tools = [semantic_scholar_tool, get_paper_details_tool]
+    tools = [semantic_scholar_tool, get_paper_details_tool, download_paper_tool]
     
     prompt = ChatPromptTemplate.from_messages([
         ("system", CODING_AGENT_SYSTEM_PROMPT),
