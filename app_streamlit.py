@@ -59,9 +59,6 @@ if selected_agent_name == "StudyBuddy":
 
 # display welcome message and example prompts if chat is empty
 if not st.session_state.messages:
-    st.markdown("### Welcome! How can I help you today?")
-    st.write("Or try one of these examples to get started:")
-
     example_prompts = {
         "CodeHelper": [
             "Write a Python function to sort a list of dictionaries by a specific key.",
@@ -72,29 +69,34 @@ if not st.session_state.messages:
             "What is the abstract of the paper with ID '1706.03762'?",
         ],
         "StudyBuddy": [
-            "Summarize my notes on the key concepts of machine learning.",
-            "List the important formulas from my 'calculus_cheatsheet.pdf'.",
+            # "Summarize my notes on the key concepts of machine learning.",
+            # "List the important formulas from my 'calculus_cheatsheet.pdf'.",
         ]
     }
-
-    cols = st.columns(2)
     
     prompts_for_agent = example_prompts[selected_agent_name]
 
-    for i, col in enumerate(cols):
-        with col:
-            if st.button(prompts_for_agent[i], use_container_width=True):
-                prompt = prompts_for_agent[i]
-                
-                st.session_state.messages.append({"role": "user", "content": prompt})
-                
-                with st.chat_message("assistant"):
-                    with st.spinner(f"{selected_agent_name} is thinking..."):
-                        response = route_query(query=prompt, agent_name=selected_agent_props['id'])
-                        st.markdown(response)
-                
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                st.rerun()
+    
+    st.markdown("### Welcome! How can I help you today?")
+    if prompts_for_agent: st.write("Or try one of these examples to get started:")
+
+    cols = st.columns(2)
+    
+    if prompts_for_agent:
+        for i, col in enumerate(cols):
+            with col:
+                if st.button(prompts_for_agent[i], use_container_width=True):
+                    prompt = prompts_for_agent[i]
+                    
+                    st.session_state.messages.append({"role": "user", "content": prompt})
+                    
+                    with st.chat_message("assistant"):
+                        with st.spinner(f"{selected_agent_name} is thinking..."):
+                            response = route_query(query=prompt, agent_name=selected_agent_props['id'])
+                            st.markdown(response)
+                    
+                    st.session_state.messages.append({"role": "assistant", "content": response})
+                    st.rerun()
 
 # display the previous chat messages from history
 for message in st.session_state.messages:
