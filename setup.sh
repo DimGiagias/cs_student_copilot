@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Usage:
-#   ./setup_venv.sh        # Installs dependencies using pip and requirements.txt
-#   ./setup_venv.sh --uv   # Installs dependencies using uv
+#   ./setup.sh        # Installs dependencies using pip and requirements.txt
+#   ./setup.sh --uv   # Installs dependencies using uv
 #
 
 set -e
