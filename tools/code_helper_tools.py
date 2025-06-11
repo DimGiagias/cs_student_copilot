@@ -7,11 +7,11 @@ class CodeInput(BaseModel):
     code: str = Field(description="The code to execute.")
 
 def run_code(code: str) -> str:
-    print(f"\n--- Code Execution Request ---\nCode to execute:\n```python\n{code}\n```")
-    confirm = input("Do you want to execute this code? [y/N]: ").lower()
+    # print(f"\n--- Code Execution Request ---\nCode to execute:\n```python\n{code}\n```")
+    # confirm = input("Do you want to execute this code? [y/N]: ").lower()
     
-    if confirm != 'y':
-        return "Execution cancelled by user."
+    # if confirm != 'y':
+    #     return "Execution cancelled by user."
     
     try:
         local_vars = {}
