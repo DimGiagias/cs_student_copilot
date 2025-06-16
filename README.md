@@ -19,7 +19,7 @@ The CS Student Copilot is comprised of a coordinator that routes tasks to three 
 
 - **ScholarScout 🎓**
   - Uses the Semantic Scholar API to find relevant papers based on keywords, topics, or authors.
-  - Retrieves detailed abstracts and "TLDR" summaries for specific papers.
+  - Retrieves detailed abstracts and "TL;DR" summaries for specific papers.
   - Can download the PDF of any open-access paper directly to a local folder, automatically naming the file with the paper's title.
 
 ## Quick Start
