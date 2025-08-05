@@ -38,7 +38,7 @@ cd cs_student_copilot
 
 #### 2. Setup Environment and Install Requirements
 
-You can use the provided setup script for easy environment setup:
+You can use the provided setup script for easy environment setup (on Linux):
 
 with `uv`:
 
@@ -50,6 +50,11 @@ with `pip`:
 
 ```bash
 ./setup.sh
+```
+Or use the `requirements.txt` file directly:
+
+```bash
+pip install -r requirements.txt
 ```
 
 #### 3. Configuration
@@ -140,5 +145,6 @@ streamlit run app_streamlit.py
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
 
 
